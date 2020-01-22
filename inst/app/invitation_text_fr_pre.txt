@@ -1,0 +1,3 @@
+Bonjour {firstname} {lastname},
+Vous êtes {ifelse({Sexe} == 'Femme', 'diplômée', 'diplômé')} de L'UPS en 2017 en {Libellé diplôme}.
+L'année dernière, nous vous avions {ifelse({Sexe} == 'Femme', 'interrogée', 'interrogé')} suite à votre {Type diplôme précédent}, votre situation a-t-elle changé ?
