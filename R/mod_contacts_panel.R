@@ -820,15 +820,15 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     participants <- rv$df_participant_selected() %>% 
       dplyr::mutate(email = input$select_email)
     
-    mail_template <- impexp::sqlite_import(
-      golem::get_golem_options("sqlite_base"),
-      "mail_template"
-    )
+    participants_attributes <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "participants_attributes") %>% 
+      tidyr::separate_rows(survey_id, sep = ";") %>% 
+      dplyr::filter(survey_id == rv$df_participant_selected()$survey_id)
     
     mail_template <- impexp::sqlite_import(
       golem::get_golem_options("sqlite_base"),
       "mail_template"
     ) %>% 
+      dplyr::mutate_at("value", survey.admin::escape_space_glue, participants_attributes) %>% 
       dplyr::mutate_at("value", ~ purrr::map_chr(., ~ glue::glue_data(., .x = rv$df_participant_selected()))) %>% 
       dplyr::mutate_at("value", stringr::str_replace_all, "'+", "'") %>% 
       split(x = .$value, f = .$key)
