@@ -202,7 +202,6 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     }
     
     data_proxy <- data_proxy %>% 
-      dplyr::filter(type != "launch_questionnaire") %>% 
       dplyr::mutate_at("date", lubridate::ymd) %>% 
       dplyr::group_by(token) %>% 
       dplyr::summarise(
