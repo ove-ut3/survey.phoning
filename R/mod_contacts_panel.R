@@ -135,14 +135,17 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         rv$df_participant_selected(),
         by = "token"
       ) %>% 
-      dplyr::select(type, comment, date) %>% 
+      dplyr::select(type, comment, date, token) %>% 
       dplyr::filter(type != "launch_questionnaire") %>% 
       tidyr::drop_na(type) %>% 
-      dplyr::add_row(date = as.character(lubridate::today())) %>% 
+      dplyr::add_row(
+        date = as.character(lubridate::today()),
+        token = rv$df_participant_selected()$token
+        ) %>% 
       rhandsontable::rhandsontable(rowHeaders = NULL) %>% 
       rhandsontable::hot_table(highlightCol = TRUE, highlightRow = TRUE, stretchH = "all") %>%
       rhandsontable::hot_rows(rowHeights = 35) %>%
-      rhandsontable::hot_cols(valign = "htMiddle") %>% 
+      rhandsontable::hot_cols(colWidths = c(150, 280, 70, 1)) %>% 
       rhandsontable::hot_col(col = "date", type = "date", dateFormat = "YYYY-MM-DD", default = as.character(lubridate::today()))
     
   })
@@ -159,16 +162,21 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       rhandsontable::hot_to_r() %>% 
       dplyr::as_tibble() %>% 
       dplyr::mutate(
-        token = rv$df_participant_selected()$token,
         datetime = as.character(lubridate::now()),
         user = rv$user$user
       ) %>% 
       tidyr::drop_na(type) %>% 
       dplyr::select(token, type, comment, date, datetime, user)
     
+    if (nrow(hot_update) == 0) {
+      token_sqlite <- rv$df_participant_selected()$token
+    } else {
+      token_sqlite <- hot_update$token
+    }
+    
     impexp::sqlite_execute_sql(
       golem::get_golem_options("sqlite_base"),
-      paste0('DELETE FROM phoning_team_events WHERE token = "', rv$df_participant_selected()$token, '";')
+      glue::glue("DELETE FROM phoning_team_events WHERE token = \"{token_sqlite}\";")
     )
     
     impexp::sqlite_append_rows(
@@ -283,14 +291,20 @@ mod_contacts_panel_server <- function(input, output, session, rv){
   
   output$hot_contacts_valid <- rhandsontable::renderRHandsontable({
     
-    rv$df_participant_selected_contacts() %>% 
+    df <- rv$df_participant_selected_contacts() %>% 
       dplyr::filter(!status %in% "invalid") %>% 
       dplyr::filter(!key %in% "tel_etudiant") %>% 
-      dplyr::select(key, value) %>% 
+      dplyr::select(key, value, token)
+    
+    if (nrow(df) == 0) {
+      df <- dplyr::add_row(df, token = rv$df_participant_selected()$token)
+    }
+    
+    df %>% 
       rhandsontable::rhandsontable(rowHeaders = NULL) %>% 
       rhandsontable::hot_table(highlightCol = TRUE, highlightRow = TRUE, stretchH = "all") %>%
       rhandsontable::hot_rows(rowHeights = 35) %>%
-      rhandsontable::hot_cols(valign = "htMiddle")
+      rhandsontable::hot_cols(valign = "htMiddle", colWidths = c(100, 100, 1))
     
   })
   
@@ -304,8 +318,13 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     
     hot_update <- input$hot_contacts_valid %>% 
       rhandsontable::hot_to_r() %>% 
-      dplyr::as_tibble() %>% 
-      dplyr::mutate(token = rv$df_participant_selected()$token) %>% 
+      dplyr::as_tibble()
+  
+    if (nrow(hot_update) >= 1) {
+      hot_update <- tidyr::replace_na(hot_update, list(token = na.omit(hot_update$token[1])))
+    }
+      
+    hot_update <- hot_update %>% 
       dplyr::left_join(
         rv$df_phoning_participants_contacts,
         by = c("token", "key", "value")
@@ -331,7 +350,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
             golem::get_golem_options("sqlite_base"),
             "phoning_participants_contacts"
           ) %>% 
-            dplyr::filter(token == rv$df_participant_selected()$token, status == "valid") %>% 
+            dplyr::filter(token == hot_update$token, status == "valid") %>% 
             survey.admin::df_participants_contacts_crowdsourcing() %>% 
             tidyr::gather("key", "value", -token, na.rm = TRUE) %>% 
             dplyr::rename(old_value = value),
@@ -350,9 +369,15 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         "phoning_crowdsourcing_log"
       )
       
+      if (nrow(hot_update) == 0) {
+        token_sqlite <- rv$df_participant_selected()$token
+      } else {
+        token_sqlite <- hot_update$token
+      }
+      
       impexp::sqlite_execute_sql(
         golem::get_golem_options("sqlite_base"),
-        glue::glue("DELETE FROM phoning_participants_contacts WHERE token = \"{rv$df_participant_selected()$token}\" AND status = \"valid\";")
+        glue::glue("DELETE FROM phoning_participants_contacts WHERE token = \"{token_sqlite}\" AND status = \"valid\";")
       )
       
       impexp::sqlite_append_rows(
@@ -422,17 +447,17 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     df <-  rv$df_participant_selected_contacts() %>% 
       dplyr::filter(status == "invalid") %>% 
       dplyr::filter(key != "tel_etudiant") %>% 
-      dplyr::select(key, value)
+      dplyr::select(key, value, token)
     
     if (nrow(df) == 0) {
-      df <- dplyr::add_row(df)
+      df <- dplyr::add_row(df, token = rv$df_participant_selected()$token)
     }
     
     df %>% 
       rhandsontable::rhandsontable(rowHeaders = NULL) %>% 
       rhandsontable::hot_table(highlightCol = TRUE, highlightRow = TRUE, stretchH = "all") %>%
       rhandsontable::hot_rows(rowHeights = 35) %>%
-      rhandsontable::hot_cols(valign = "htMiddle")
+      rhandsontable::hot_cols(valign = "htMiddle", colWidths = c(100, 100, 1))
     
   })
   
@@ -446,9 +471,14 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     
     hot_update <- input$hot_contacts_invalid %>% 
       rhandsontable::hot_to_r() %>% 
-      dplyr::as_tibble() %>% 
+      dplyr::as_tibble()
+    
+    if (nrow(hot_update) >= 1) {
+      hot_update <- tidyr::replace_na(hot_update, list(token = na.omit(hot_update$token[1])))
+    }
+    
+    hot_update <- hot_update %>% 
       dplyr::mutate(
-        token = rv$df_participant_selected()$token,
         source = "phoning_invalid",
         date = as.character(lubridate::today()),
         service = NA_character_,
@@ -490,9 +520,15 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         "phoning_crowdsourcing_log"
       )
       
+      if (nrow(hot_update) == 0) {
+        token_sqlite <- rv$df_participant_selected()$token
+      } else {
+        token_sqlite <- hot_update$token
+      }
+      
       impexp::sqlite_execute_sql(
         golem::get_golem_options("sqlite_base"),
-        glue::glue("DELETE FROM phoning_participants_contacts WHERE token = \"{rv$df_participant_selected()$token}\" AND status = \"invalid\";")
+        glue::glue("DELETE FROM phoning_participants_contacts WHERE token = \"{token_sqlite}\" AND status = \"invalid\";")
       )
       
       impexp::sqlite_append_rows(
