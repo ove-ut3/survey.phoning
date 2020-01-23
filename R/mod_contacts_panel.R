@@ -114,7 +114,6 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         by = "token"
       ) %>% 
       dplyr::select(type, comment, date) %>% 
-      dplyr::filter(type != "launch_questionnaire") %>% 
       tidyr::drop_na(type) %>% 
       dplyr::add_row(date = as.character(lubridate::today()))
     
@@ -136,7 +135,6 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         by = "token"
       ) %>% 
       dplyr::select(type, comment, date, token) %>% 
-      dplyr::filter(type != "launch_questionnaire") %>% 
       tidyr::drop_na(type) %>% 
       dplyr::add_row(
         date = as.character(lubridate::today()),
