@@ -672,6 +672,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
   
   observeEvent(input$take_appointment, {
     
+    req(input$appointment)
+    
     if (rv$user$user == "admin") {
       
       user <- rv$df_participant_selected()$user
