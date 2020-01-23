@@ -171,7 +171,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     if (nrow(hot_update) == 0) {
       token_sqlite <- rv$df_participant_selected()$token
     } else {
-      token_sqlite <- hot_update$token
+      token_sqlite <- hot_update$token[1]
     }
     
     impexp::sqlite_execute_sql(
@@ -341,6 +341,12 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     
     if (isTRUE(!is.na(key) & !is.na(new_value)) | changes$event == "afterRemoveRow") {
       
+      if (nrow(hot_update) == 0) {
+        token_sqlite <- rv$df_participant_selected()$token
+      } else {
+        token_sqlite <- hot_update$token[1]
+      }
+      
       phoning_crowdsourcing_log <- hot_update %>% 
         survey.admin::df_participants_contacts_crowdsourcing() %>% 
         tidyr::gather("key", "value", -token, na.rm = TRUE) %>% 
@@ -350,7 +356,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
             golem::get_golem_options("sqlite_base"),
             "phoning_participants_contacts"
           ) %>% 
-            dplyr::filter(token == hot_update$token, status == "valid") %>% 
+            dplyr::filter(token == token_sqlite, status == "valid") %>% 
             survey.admin::df_participants_contacts_crowdsourcing() %>% 
             tidyr::gather("key", "value", -token, na.rm = TRUE) %>% 
             dplyr::rename(old_value = value),
@@ -368,12 +374,6 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         phoning_crowdsourcing_log,
         "phoning_crowdsourcing_log"
       )
-      
-      if (nrow(hot_update) == 0) {
-        token_sqlite <- rv$df_participant_selected()$token
-      } else {
-        token_sqlite <- hot_update$token
-      }
       
       impexp::sqlite_execute_sql(
         golem::get_golem_options("sqlite_base"),
@@ -492,6 +492,12 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     
     if (isTRUE(!is.na(key) & !is.na(new_value)) | changes$event == "afterRemoveRow") {
       
+      if (nrow(hot_update) == 0) {
+        token_sqlite <- rv$df_participant_selected()$token
+      } else {
+        token_sqlite <- hot_update$token[1]
+      }
+      
       phoning_crowdsourcing_log <- hot_update %>% 
         survey.admin::df_participants_contacts_crowdsourcing() %>% 
         tidyr::gather("key", "value", -token, na.rm = TRUE) %>% 
@@ -501,7 +507,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
             golem::get_golem_options("sqlite_base"),
             "phoning_participants_contacts"
           ) %>% 
-            dplyr::filter(token == rv$df_participant_selected()$token, status == "invalid") %>% 
+            dplyr::filter(token == token_sqlite, status == "invalid") %>% 
             survey.admin::df_participants_contacts_crowdsourcing() %>% 
             tidyr::gather("key", "value", -token, na.rm = TRUE) %>% 
             dplyr::rename(old_value = value),
@@ -519,12 +525,6 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         phoning_crowdsourcing_log,
         "phoning_crowdsourcing_log"
       )
-      
-      if (nrow(hot_update) == 0) {
-        token_sqlite <- rv$df_participant_selected()$token
-      } else {
-        token_sqlite <- hot_update$token
-      }
       
       impexp::sqlite_execute_sql(
         golem::get_golem_options("sqlite_base"),
