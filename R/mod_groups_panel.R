@@ -38,8 +38,6 @@ mod_groups_panel_server <- function(input, output, session, rv){
     
     req(rv$attributes_groups)
     
-    #browser()
-    
     rv$df_groups <- rv$df_participants_user() %>% 
       df_groups(rv$attributes_groups, user = rv$user$user)
     
