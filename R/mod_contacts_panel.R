@@ -921,22 +921,12 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     tagList(
       h3("Linkedin"),
       div(
-        style = "display: inline-block;",
         actionButton(
           ns("linkedin_button_search"),
           label = "Recherche", 
           icon = icon("search"), 
-          onclick = paste0("window.open('", paste0("https://www.linkedin.com/search/results/all/?keywords=", rv$df_participant_selected()$firstname, "%20", rv$df_participant_selected()$lastname, "%20", input$linkedin_search_suffix_text), "', '_blank')")
+          onclick = paste0("window.open('", paste0("https://www.linkedin.com/search/results/all/?keywords=", rv$df_participant_selected()$firstname, "%20", rv$df_participant_selected()$lastname, "%20", linkedin_search_suffix_text), "', '_blank')")
         )
-      ),
-      div(
-        style = "display: inline-block;",
-        textInput(
-          ns("linkedin_search_suffix_text"),
-          label = NULL,
-          value = linkedin_search_suffix_text,
-          placeholder = "Search suffix (for example, a city to filter results)"
-        ),
       ),
       br(),
       rclipboard::rclipButton(ns("linkedin_invitation_fr"), "Invitation (fr)", iconv(invitation_text_fr, from = "UTF-8"), icon("clipboard")),
