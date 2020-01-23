@@ -103,20 +103,12 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       )
     
   })
-  
-  rv$df_sqlite_events <- reactiveFileReader(
-    1000,
-    session,
-    golem::get_golem_options("sqlite_base"),
-    impexp::sqlite_import,
-    "phoning_team_events"
-  )
-  
+
   output$ui_phoning_events <- renderUI({
     
     req(rv$df_participant_selected())
     
-    data <- rv$df_sqlite_events() %>% 
+    data <- rv$df_phoning_team_events %>% 
       dplyr::semi_join(
         rv$df_participant_selected(),
         by = "token"
@@ -138,7 +130,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
   
   output$hot_phoning_events <- rhandsontable::renderRHandsontable({
     
-    rv$df_sqlite_events() %>% 
+    rv$df_phoning_team_events %>% 
       dplyr::semi_join(
         rv$df_participant_selected(),
         by = "token"
@@ -185,11 +177,16 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       "phoning_team_events"
     )
     
+    rv$df_phoning_team_events <- impexp::sqlite_import(
+      golem::get_golem_options("sqlite_base"),
+      "phoning_team_events"
+    )
+    
   })
   
   data_proxy <- reactive({
     
-    data_proxy <- rv$df_sqlite_events() %>% 
+    data_proxy <- rv$df_phoning_team_events %>% 
       tidyr::drop_na(type)
     
     if (rv$user$user != "admin") {
@@ -401,6 +398,11 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       ),
       "phoning_team_events"
     )
+    
+    rv$df_phoning_team_events <- impexp::sqlite_import(
+      golem::get_golem_options("sqlite_base"),
+      "phoning_team_events"
+    )
 
   })
   
@@ -552,6 +554,11 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       "phoning_team_events"
     )
     
+    rv$df_phoning_team_events <- impexp::sqlite_import(
+      golem::get_golem_options("sqlite_base"),
+      "phoning_team_events"
+    )
+    
   })
   
   observeEvent(input$aucune_messagerie, {
@@ -569,6 +576,11 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       "phoning_team_events"
     )
     
+    rv$df_phoning_team_events <- impexp::sqlite_import(
+      golem::get_golem_options("sqlite_base"),
+      "phoning_team_events"
+    )
+    
   })
   
   observeEvent(input$faux_numero, {
@@ -583,6 +595,11 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         datetime = as.character(lubridate::now()),
         user = rv$user$user
       ),
+      "phoning_team_events"
+    )
+    
+    rv$df_phoning_team_events <- impexp::sqlite_import(
+      golem::get_golem_options("sqlite_base"),
       "phoning_team_events"
     )
     
@@ -649,6 +666,11 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       "phoning_team_events"
     )
     
+    rv$df_phoning_team_events <- impexp::sqlite_import(
+      golem::get_golem_options("sqlite_base"),
+      "phoning_team_events"
+    )
+    
   })
   
   next_appointment <- reactivePoll(
@@ -659,7 +681,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
 
     req(rv$user$user)
 
-    rv$df_sqlite_events() %>%
+      rv$df_phoning_team_events %>%
       dplyr::filter(
         type == "Rendez-vous téléphonique",
         user == rv$user$user
@@ -799,6 +821,11 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       "phoning_team_events"
     )
     
+    rv$df_phoning_team_events <- impexp::sqlite_import(
+      golem::get_golem_options("sqlite_base"),
+      "phoning_team_events"
+    )
+    
   })
   
   observeEvent(input$confirm_sms, {
@@ -842,6 +869,11 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         datetime = as.character(lubridate::now()),
         user = rv$user$user
       ),
+      "phoning_team_events"
+    )
+    
+    rv$df_phoning_team_events <- impexp::sqlite_import(
+      golem::get_golem_options("sqlite_base"),
       "phoning_team_events"
     )
     
@@ -928,6 +960,11 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       "phoning_team_events"
     )
     
+    rv$df_phoning_team_events <- impexp::sqlite_import(
+      golem::get_golem_options("sqlite_base"),
+      "phoning_team_events"
+    )
+    
   })
   
   observeEvent(input$linkedin_invitation_fr, {
@@ -950,6 +987,11 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       "phoning_team_events"
     )
     
+    rv$df_phoning_team_events <- impexp::sqlite_import(
+      golem::get_golem_options("sqlite_base"),
+      "phoning_team_events"
+    )
+    
   })
   
   observeEvent(input$linkedin_invitation_en, {
@@ -969,6 +1011,11 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         datetime = as.character(lubridate::now()),
         user = rv$user$user
       ),
+      "phoning_team_events"
+    )
+    
+    rv$df_phoning_team_events <- impexp::sqlite_import(
+      golem::get_golem_options("sqlite_base"),
       "phoning_team_events"
     )
     
@@ -1038,6 +1085,11 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       ),
       "phoning_team_events"
     )
+    
+    rv$df_phoning_team_events <- impexp::sqlite_import(
+      golem::get_golem_options("sqlite_base"),
+      "phoning_team_events"
+    )
 
   })
   
@@ -1069,6 +1121,11 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       "phoning_team_events"
     )
     
+    rv$df_phoning_team_events <- impexp::sqlite_import(
+      golem::get_golem_options("sqlite_base"),
+      "phoning_team_events"
+    )
+    
   })
   
   output$phone_missed_calls <- DT::renderDT({
@@ -1096,7 +1153,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
   
   output$phone_appointments <- fullcalendar::renderFullcalendar({
 
-    data <- rv$df_sqlite_events() %>%
+    data <- rv$df_phoning_team_events %>%
       dplyr::filter(type == "Rendez-vous téléphonique")
 
     if (rv$user$user != "admin") {

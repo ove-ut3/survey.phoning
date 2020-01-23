@@ -70,6 +70,8 @@ mod_init_sqlite_server <- function(input, output, session, rv){
     )
   }
   
+  rv$df_phoning_team_events <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "phoning_team_events")
+  
   if (! "phoning_crowdsourcing_log" %in% impexp::sqlite_list_tables(golem::get_golem_options("sqlite_base"))) {
     
     impexp::sqlite_export(
