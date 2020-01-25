@@ -335,7 +335,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     key <- hot_update[changes$changes[[1]][[1]] + 1, ]$key
     new_value <- hot_update[changes$changes[[1]][[1]] + 1, ]$value
     
-    if (isTRUE(!is.na(key) & !is.na(new_value)) | changes$event == "afterRemoveRow") {
+    if (isTRUE(!is.na(key) & !is.na(new_value) & new_value != "") | changes$event == "afterRemoveRow") {
       
       if (nrow(hot_update) == 0) {
         token_sqlite <- rv$df_participant_selected()$token
@@ -486,7 +486,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     key <- hot_update[changes$changes[[1]][[1]] + 1, ]$key
     new_value <- hot_update[changes$changes[[1]][[1]] + 1, ]$value
     
-    if (isTRUE(!is.na(key) & !is.na(new_value)) | changes$event == "afterRemoveRow") {
+    if (isTRUE(!is.na(key) & !is.na(new_value) & new_value != "") | changes$event == "afterRemoveRow") {
       
       if (nrow(hot_update) == 0) {
         token_sqlite <- rv$df_participant_selected()$token
