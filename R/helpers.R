@@ -65,7 +65,6 @@ df_participants_events <- function(df) {
         dplyr::select(token, n_events, last_event_date),
       by = "token"
     ) %>%
-    tidyr::replace_na(list(n_events = 0L)) %>%
     dplyr::mutate(
       n_events = dplyr::if_else(completed | optout, NA_integer_, n_events),
       last_event_date = dplyr::if_else(completed | optout, lubridate::as_date(NA_character_), last_event_date)

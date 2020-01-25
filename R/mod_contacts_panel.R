@@ -246,9 +246,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
               dplyr::select(c("token", rv$attributes_groups, completed, optout)),
             by = "token"
           ) %>%
-          tidyr::replace_na(list(hot_n_events = 0)) %>%
           dplyr::mutate(
-            hot_n_events = dplyr::if_else(completed | optout, NA_real_, hot_n_events),
+            hot_n_events = dplyr::if_else(completed | optout, NA_integer_, hot_n_events),
             hot_last_event_date = dplyr::if_else(completed | optout, lubridate::as_date(NA_character_), hot_last_event_date)
           ) %>% 
           dplyr::group_by_at(rv$attributes_groups) %>%
