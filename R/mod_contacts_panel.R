@@ -96,7 +96,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
   
   rv$df_participant_selected_contacts <- reactive({
     
-    rv$df_phoning_participants_contacts %>% 
+    rv$df_participants_contacts %>% 
       dplyr::semi_join(
         rv$df_participant_selected(),
         by = "token"
@@ -322,7 +322,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       
     hot_update <- hot_update %>% 
       dplyr::left_join(
-        rv$df_phoning_participants_contacts,
+        rv$df_participants_contacts,
         by = c("token", "key", "value")
       ) %>% 
       dplyr::mutate(
@@ -350,7 +350,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         dplyr::full_join(
           impexp::sqlite_import(
             golem::get_golem_options("sqlite_base"),
-            "phoning_participants_contacts"
+            "participants_contacts"
           ) %>% 
             dplyr::filter(token == token_sqlite, status == "valid") %>% 
             survey.admin::df_participants_contacts_crowdsourcing() %>% 
@@ -373,18 +373,18 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       
       impexp::sqlite_execute_sql(
         golem::get_golem_options("sqlite_base"),
-        glue::glue("DELETE FROM phoning_participants_contacts WHERE token = \"{token_sqlite}\" AND status = \"valid\";")
+        glue::glue("DELETE FROM participants_contacts WHERE token = \"{token_sqlite}\" AND status = \"valid\";")
       )
       
       impexp::sqlite_append_rows(
         golem::get_golem_options("sqlite_base"),
         hot_update,
-        "phoning_participants_contacts"
+        "participants_contacts"
       )
       
-      rv$df_phoning_participants_contacts <- impexp::sqlite_import(
+      rv$df_participants_contacts <- impexp::sqlite_import(
         golem::get_golem_options("sqlite_base"),
-        "phoning_participants_contacts"
+        "participants_contacts"
       )
       
     }
@@ -501,7 +501,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         dplyr::full_join(
           impexp::sqlite_import(
             golem::get_golem_options("sqlite_base"),
-            "phoning_participants_contacts"
+            "participants_contacts"
           ) %>% 
             dplyr::filter(token == token_sqlite, status == "invalid") %>% 
             survey.admin::df_participants_contacts_crowdsourcing() %>% 
@@ -524,18 +524,18 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       
       impexp::sqlite_execute_sql(
         golem::get_golem_options("sqlite_base"),
-        glue::glue("DELETE FROM phoning_participants_contacts WHERE token = \"{token_sqlite}\" AND status = \"invalid\";")
+        glue::glue("DELETE FROM participants_contacts WHERE token = \"{token_sqlite}\" AND status = \"invalid\";")
       )
       
       impexp::sqlite_append_rows(
         golem::get_golem_options("sqlite_base"),
         hot_update,
-        "phoning_participants_contacts"
+        "participants_contacts"
       )
       
-      rv$df_phoning_participants_contacts <- impexp::sqlite_import(
+      rv$df_participants_contacts <- impexp::sqlite_import(
         golem::get_golem_options("sqlite_base"),
-        "phoning_participants_contacts"
+        "participants_contacts"
       )
       
     }

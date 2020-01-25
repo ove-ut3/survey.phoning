@@ -36,20 +36,6 @@ mod_init_sqlite_server <- function(input, output, session, rv){
   
   rv$df_participants_contacts <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "participants_contacts")
   
-  if (! "phoning_participants_contacts" %in% impexp::sqlite_list_tables(golem::get_golem_options("sqlite_base"))) {
-    
-    impexp::sqlite_export(
-      golem::get_golem_options("sqlite_base"), 
-      impexp::sqlite_import(
-        golem::get_golem_options("sqlite_base"),
-        "participants_contacts"
-      ),
-      "phoning_participants_contacts"
-    )
-  }
-  
-  rv$df_phoning_participants_contacts <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "phoning_participants_contacts")
-  
   rv$df_phoning_team <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "phoning_team")
   rv$df_phoning_team_group <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "phoning_team_group") %>% 
     dplyr::rename_all(stringr::str_replace_all, "\\.", " ")
