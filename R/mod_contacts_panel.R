@@ -317,17 +317,17 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       dplyr::as_tibble()
   
     if (nrow(hot_update) >= 1) {
-      hot_update <- tidyr::replace_na(hot_update, list(token = na.omit(hot_update$token[1])))
+      hot_update <- tidyr::replace_na(hot_update, list(token = na.omit(hot_update$token)[1]))
     }
-      
+    
     hot_update <- hot_update %>% 
       dplyr::left_join(
         rv$df_participants_contacts,
         by = c("token", "key", "value")
       ) %>% 
+      tidyr::replace_na(list(date = as.character(lubridate::today()))) %>% 
       dplyr::mutate(
-        source = "phoning_valid",
-        date = as.character(lubridate::today()),
+        source = "phoning",
         status = "valid"
       ) %>% 
       dplyr::select(token, key, value, source, date, service, status, status_date)
@@ -470,16 +470,18 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       dplyr::as_tibble()
     
     if (nrow(hot_update) >= 1) {
-      hot_update <- tidyr::replace_na(hot_update, list(token = na.omit(hot_update$token[1])))
+      hot_update <- tidyr::replace_na(hot_update, list(token = na.omit(hot_update$token)[1]))
     }
     
     hot_update <- hot_update %>% 
+      dplyr::left_join(
+        rv$df_participants_contacts,
+        by = c("token", "key", "value")
+      ) %>% 
+      tidyr::replace_na(list(date = as.character(lubridate::today()))) %>% 
       dplyr::mutate(
-        source = "phoning_invalid",
-        date = as.character(lubridate::today()),
-        service = NA_character_,
-        status = "invalid",
-        status_date = NA_character_
+        source = "phoning",
+        status = "invalid"
       ) %>% 
       dplyr::select(token, key, value, source, date, service, status, status_date)
     
