@@ -325,11 +325,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         rv$df_participants_contacts,
         by = c("token", "key", "value")
       ) %>% 
-      tidyr::replace_na(list(date = as.character(lubridate::today()))) %>% 
-      dplyr::mutate(
-        source = "phoning",
-        status = "valid"
-      ) %>% 
+      dplyr::mutate(status = "valid") %>% 
       dplyr::select(token, key, value, source, date, service, status, status_date)
     
     key <- hot_update[changes$changes[[1]][[1]] + 1, ]$key
@@ -342,6 +338,9 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       } else {
         token_sqlite <- hot_update$token[1]
       }
+      
+      hot_update$source[changes$changes[[1]][[1]] + 1] <- "phoning"
+      hot_update$date[changes$changes[[1]][[1]] + 1] <- as.character(lubridate::today())
       
       phoning_crowdsourcing_log <- hot_update %>% 
         survey.admin::df_participants_contacts_crowdsourcing() %>% 
@@ -478,11 +477,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         rv$df_participants_contacts,
         by = c("token", "key", "value")
       ) %>% 
-      tidyr::replace_na(list(date = as.character(lubridate::today()))) %>% 
-      dplyr::mutate(
-        source = "phoning",
-        status = "invalid"
-      ) %>% 
+      dplyr::mutate(status = "invalid") %>% 
       dplyr::select(token, key, value, source, date, service, status, status_date)
     
     key <- hot_update[changes$changes[[1]][[1]] + 1, ]$key
@@ -495,6 +490,9 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       } else {
         token_sqlite <- hot_update$token[1]
       }
+      
+      hot_update$source[changes$changes[[1]][[1]] + 1] <- "phoning"
+      hot_update$date[changes$changes[[1]][[1]] + 1] <- as.character(lubridate::today())
       
       phoning_crowdsourcing_log <- hot_update %>% 
         survey.admin::df_participants_contacts_crowdsourcing() %>% 
