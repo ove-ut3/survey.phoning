@@ -925,33 +925,29 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       dplyr::filter(key == "search_text_input") %>% 
       dplyr::pull(value)
     
-    path <- system.file('app', package = 'survey.phoning')
-    
-    if (!is.na(rv$df_participant_selected()[["Type diplôme précédent"]])) {
-      invitation_text_fr <- glue::glue("{path}/invitation_text_fr_pre.txt")
-    } else {
-      invitation_text_fr <- glue::glue("{path}/invitation_text_fr.txt")
-    }
-    
-    invitation_text_fr <- invitation_text_fr %>% 
-      readLines(encoding = "UTF-8") %>% 
-      paste(collapse = "\n") %>% 
+    invitation_text_fr <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "linkedin") %>% 
+      dplyr::filter(key == "invitation_text_fr") %>% 
+      dplyr::pull(value) %>% 
       survey.admin::escape_space_glue(
         impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "participants_attributes") %>% 
           tidyr::separate_rows(survey_id, sep = ";") %>% 
           dplyr::filter(survey_id == rv$df_participant_selected()$survey_id)
       ) %>% 
-      glue::glue_data(.x = rv$df_participant_selected())
+      glue::glue_data(.x = rv$df_participant_selected()) %>% 
+      glue::glue_data(.x = rv$df_participant_selected()) %>% 
+      iconv(from = "UTF-8")
     
-    invitation_text_en <- glue::glue("{path}/invitation_text_en.txt") %>% 
-      readLines(encoding = "UTF-8") %>% 
-      paste(collapse = "\n") %>% 
+    invitation_text_en <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "linkedin") %>% 
+      dplyr::filter(key == "invitation_text_en") %>% 
+      dplyr::pull(value) %>% 
       survey.admin::escape_space_glue(
         impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "participants_attributes") %>% 
           tidyr::separate_rows(survey_id, sep = ";") %>% 
           dplyr::filter(survey_id == rv$df_participant_selected()$survey_id)
       ) %>% 
-      glue::glue_data(.x = rv$df_participant_selected())
+      glue::glue_data(.x = rv$df_participant_selected()) %>% 
+      glue::glue_data(.x = rv$df_participant_selected()) %>% 
+      iconv(from = "UTF-8")
     
     tagList(
       h3("Linkedin"),
@@ -964,8 +960,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         )
       ),
       br(),
-      rclipboard::rclipButton(ns("linkedin_invitation_fr"), "Invitation (fr)", iconv(invitation_text_fr, from = "UTF-8"), icon("clipboard")),
-      rclipboard::rclipButton(ns("linkedin_invitation_en"), "Invitation (en)", iconv(invitation_text_en, from = "UTF-8"), icon("clipboard"))
+      rclipboard::rclipButton(ns("linkedin_invitation_fr"), "Invitation (fr)", invitation_text_fr, icon("clipboard")),
+      rclipboard::rclipButton(ns("linkedin_invitation_en"), "Invitation (en)", invitation_text_en, icon("clipboard"))
     )
     
   })

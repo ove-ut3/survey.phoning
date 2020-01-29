@@ -1,4 +1,0 @@
-Bonjour {firstname} {lastname},
-Vous êtes {ifelse({Sexe} == 'Femme', 'diplômée', 'diplômé')} de L'UPS en 2017 en {Libellé diplôme}.
-Qu'êtes-vous {ifelse({Sexe} == 'Femme', 'devenue', 'devenu')} ?
-Votre parcours nous intéresse !
