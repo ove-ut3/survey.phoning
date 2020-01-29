@@ -200,7 +200,6 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     }
     
     data_proxy <- data_proxy %>% 
-      dplyr::mutate_at("date", lubridate::ymd) %>% 
       dplyr::group_by(token) %>% 
       dplyr::summarise(
         hot_n_events = dplyr::n_distinct(date),
@@ -241,19 +240,21 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     data_groups_proxy <- rv$df_groups %>%
       dplyr::left_join(
         data_proxy() %>%
-          dplyr::full_join(
+          dplyr::right_join(
             rv$df_participants_user() %>%
               dplyr::select(c("token", rv$attributes_groups, completed, optout)),
             by = "token"
-          ) %>%
+          ) %>% 
+          tidyr::replace_na(list(hot_n_events = 0L)) %>%
           dplyr::mutate(
             hot_n_events = dplyr::if_else(completed | optout, NA_integer_, hot_n_events),
-            hot_last_event_date = dplyr::if_else(completed | optout, lubridate::as_date(NA_character_), hot_last_event_date)
+            hot_last_event_date = dplyr::if_else(completed | optout, NA_character_, hot_last_event_date)
           ) %>% 
           dplyr::group_by_at(rv$attributes_groups) %>%
           dplyr::summarise(
             hot_n_events = suppressWarnings(as.integer(min(hot_n_events, na.rm = TRUE))),
-            hot_last_event_date = suppressWarnings(min(hot_last_event_date, na.rm = TRUE))
+            hot_last_event_date = suppressWarnings(min(hot_last_event_date, na.rm = TRUE)),
+            hot_n_events = dplyr::if_else(is.na(hot_last_event_date), NA_integer_, hot_n_events)
           ) %>%
           dplyr::ungroup(),
         by = rv$attributes_groups
