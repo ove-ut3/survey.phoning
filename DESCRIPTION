@@ -11,6 +11,7 @@ Imports:
     htmltools,
     golem,
     rclipboard,
+    rhandsontable,
     shiny,
     shinyalert,
     shinymanager,
@@ -18,4 +19,5 @@ Imports:
 RoxygenNote: 7.0.2
 Remotes:
     rasmusab/fullcalendar,
+    jrowen/rhandsontable,
     daattali/shinyalert
