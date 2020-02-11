@@ -193,13 +193,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
   data_proxy <- reactive({
     
     data_proxy <- rv$df_phoning_team_events %>% 
-      tidyr::drop_na(type)
-    
-    if (rv$user$user != "admin") {
-      data_proxy <- dplyr::filter(data_proxy, user %in% c(rv$user$user, "admin"))
-    }
-    
-    data_proxy <- data_proxy %>% 
+      tidyr::drop_na(type) %>% 
       dplyr::group_by(token) %>% 
       dplyr::summarise(
         hot_n_events = dplyr::n_distinct(date),
