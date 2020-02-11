@@ -1169,14 +1169,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
   output$phone_appointments <- fullcalendar::renderFullcalendar({
 
     data <- rv$df_phoning_team_events %>%
-      dplyr::filter(type == "Rendez-vous téléphonique")
-
-    if (rv$user$user != "admin") {
-      data <- dplyr::filter(data, user == rv$user$user)
-    }
-
-    data %>%
-      dplyr::left_join(
+      dplyr::filter(type == "Rendez-vous téléphonique") %>% 
+      dplyr::inner_join(
         rv$df_participants_user() %>%
           dplyr::select_at(c("token", "group" = rv$attributes_groups, "firstname", "lastname")),
         by = "token"
