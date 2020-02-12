@@ -1170,12 +1170,20 @@ mod_contacts_panel_server <- function(input, output, session, rv){
 
     data <- rv$df_phoning_team_events %>%
       dplyr::filter(type == "Rendez-vous téléphonique") %>% 
+      dplyr::select(-user) %>% 
       dplyr::inner_join(
         rv$df_participants_user() %>%
-          dplyr::select_at(c("token", "group" = rv$attributes_groups, "firstname", "lastname")),
+          dplyr::select_at(c("token", "group" = rv$attributes_groups, "firstname", "lastname", "user")),
         by = "token"
-      ) %>%
-      dplyr::mutate(title = glue::glue("{firstname} {lastname} - {group}")) %>% 
+      )
+    
+    if (rv$user$user == "admin") {
+      data <- dplyr::mutate(data, title = glue::glue("{user} - {firstname} {lastname} - {group}"))
+    } else {
+      data <- dplyr::mutate(data, title = glue::glue("{firstname} {lastname} - {group}"))
+    }
+    
+    data %>% 
       dplyr::mutate_at("comment", stringr::str_replace, "Le (.+?) à (.+)", "\\1 \\2:00") %>% 
       dplyr::mutate_at("comment", lubridate::dmy_hms) %>% 
       dplyr::select(title, start = comment) %>%
