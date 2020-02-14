@@ -35,6 +35,7 @@ mod_init_sqlite_server <- function(input, output, session, rv){
     dplyr::rename_all(stringr::str_replace_all, "\\.", " ")
   
   rv$df_participants_contacts <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "participants_contacts")
+  rv$df_participants_attributes <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "participants_attributes")
   
   rv$df_phoning_team <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "phoning_team")
   rv$df_phoning_team_group <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "phoning_team_group") %>% 

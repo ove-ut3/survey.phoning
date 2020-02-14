@@ -828,6 +828,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     
     survey.admin::mailing(
       participants = participants,
+      participants_attributes = rv$df_participants_attributes,
       from = list(
         "email" = mail_template$sender_email,
         "alias" = mail_template$sender_alias
