@@ -1,23 +1,40 @@
 Package: survey.phoning
 Title: Shiny application providing an user interface for phoning
-Version: 0.0.0.9000
-Authors@R: person('Stéphane', 'Le Hénanff', email = 'ove@univ-tlse3.fr', role = c('cre', 'aut'))
+Version: 0.1
+Authors@R: person('Stéphane', 'Le Hénanff', email = 'stephane.le-henanff@univ-tlse3.fr', role = c('cre', 'aut'))
 Description: A user interface gathering information about individuals to contact in the context of a survey. The application enables user to add, update, remove informations.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.0.2
 Imports: 
+    dplyr,
+    DT,
     fullcalendar,
-    htmltools,
+    glue,
     golem,
+    htmltools,
+    impexp,
+    limer,
+    lubridate,
+    purrr,
     rclipboard,
     rhandsontable,
     shiny,
     shinyalert,
     shinymanager,
-    shinythemes
-RoxygenNote: 7.0.2
+    shinythemes,
+    shinyWidgets,
+    stringr,
+    survey.admin,
+    tidyr
+Suggests:
+    survey.api
 Remotes:
     rasmusab/fullcalendar,
+    ove-ut3/impexp,
+    cloudyr/limer,
     jrowen/rhandsontable,
-    daattali/shinyalert
+    daattali/shinyalert,
+    ove-ut3/survey.admin,
+    ove-ut3/survey.api
