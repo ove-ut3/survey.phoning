@@ -4,7 +4,7 @@
 \alias{df_groups}
 \title{groups data frame}
 \usage{
-df_groups(df_participants_user, attributes_groups, user)
+df_groups(df_participants_user, attributes_groups)
 }
 \arguments{
 \item{df_participants_user}{\dots}
