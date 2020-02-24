@@ -259,7 +259,9 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       ) %>%
       dplyr::select_at(names(rv$df_groups))
 
-    #browser()
+    if (rv$user$user != "admin") {
+      data_groups_proxy <- dplyr::select(data_groups_proxy, -user)
+    }
     
     DT::replaceData(
       proxy = rv$dt_groups_proxy,
