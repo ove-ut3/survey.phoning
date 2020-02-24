@@ -259,6 +259,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       ) %>%
       dplyr::select_at(names(rv$df_groups))
 
+    #browser()
+    
     DT::replaceData(
       proxy = rv$dt_groups_proxy,
       data = data_groups_proxy,

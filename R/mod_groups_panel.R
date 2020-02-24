@@ -39,7 +39,8 @@ mod_groups_panel_server <- function(input, output, session, rv){
     req(rv$attributes_groups)
     
     rv$df_groups <- rv$df_participants_user() %>% 
-      df_groups(rv$attributes_groups, user = rv$user$user)
+      df_groups(rv$attributes_groups) %>% 
+      dplyr::select_at(c(rv$attributes_groups, "participants", "completed", "response_rate", "optout", "to_contact", "n_events", "last_event_date"))
     
     select <- c(rv$attributes_groups, "Participants" = "participants", "Complétés" = "completed", "Taux de réponse" = "response_rate", "Refus" = "optout", "A contacter" = "to_contact", "Suivis" = "n_events", "Date" = "last_event_date")
     

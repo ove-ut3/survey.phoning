@@ -6,9 +6,9 @@
 #' internal function
 #' @export
 #' @keywords internal
-df_groups <- function(df_participants_user, attributes_groups, user) {
+df_groups <- function(df_participants_user, attributes_groups) {
   
-  df_groups <- df_participants_user %>% 
+  df_participants_user %>% 
     df_participants_events() %>% 
     dplyr::mutate(participants = TRUE) %>% 
     dplyr::group_by_at(c("order", attributes_groups, "user")) %>% 
@@ -26,14 +26,8 @@ df_groups <- function(df_participants_user, attributes_groups, user) {
       n_events = dplyr::if_else(is.na(last_event_date), NA_integer_, n_events)
     ) %>% 
     dplyr::filter(to_contact >= 1) %>% 
-    dplyr::arrange(order, dplyr::desc(n_events), last_event_date, response_rate, dplyr::desc(participants)) %>% 
-    dplyr::select_at(c(attributes_groups, "participants", "completed", "response_rate", "optout", "to_contact", "n_events", "last_event_date", "user"))
+    dplyr::arrange(order, dplyr::desc(n_events), last_event_date, response_rate, dplyr::desc(participants))
   
-  if (user != "admin") {
-    df_groups <- dplyr::select(df_groups, -user)
-  }
-  
-  df_groups
 }
 
 #' participants event summary data frame
