@@ -1,12 +1,12 @@
 #' @import shiny
-app_ui <- function() {
+app_ui <- function(title) {
   
   ui <- tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # List the first level UI elements here 
     fluidPage(
-      title = "Phoning",
+      title = golem::get_golem_options("title"),
       theme = shinythemes::shinytheme("cerulean"),
       absolutePanel(
         width = "96%",
@@ -26,7 +26,8 @@ app_ui <- function() {
     )
   )
   
-  ui <- shinymanager::secure_app(ui)
+  ui <- shinymanager::secure_app(ui, language = "fr")
+  ui(title)
   
 }
 
