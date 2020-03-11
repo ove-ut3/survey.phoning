@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{df_participants_events}
 \alias{df_participants_events}
-\title{participants event summary data frame}
+\title{df_participants_events}
 \usage{
 df_participants_events(df)
 }

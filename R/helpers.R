@@ -1,3 +1,5 @@
+#' df_groups
+#'
 #' groups data frame
 #' 
 #' @param df_participants_user \dots
@@ -30,6 +32,8 @@ df_groups <- function(df_participants_user, attributes_groups) {
   
 }
 
+#' df_participants_events
+#' 
 #' participants event summary data frame
 #' 
 #' @param df \dots
