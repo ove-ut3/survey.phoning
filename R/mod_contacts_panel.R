@@ -325,7 +325,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         by = c("token", "key", "value")
       ) %>% 
       dplyr::mutate(status = "valid") %>% 
-      dplyr::select(token, key, value, source, date, service, status, status_date)
+      dplyr::select(token, key, value, source, date, service, status, status_date) %>% 
+      unique()
     
     key <- hot_update[changes$changes[[1]][[1]] + 1, ]$key
     new_value <- hot_update[changes$changes[[1]][[1]] + 1, ]$value
@@ -477,7 +478,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         by = c("token", "key", "value")
       ) %>% 
       dplyr::mutate(status = "invalid") %>% 
-      dplyr::select(token, key, value, source, date, service, status, status_date)
+      dplyr::select(token, key, value, source, date, service, status, status_date) %>% 
+      unique()
     
     key <- hot_update[changes$changes[[1]][[1]] + 1, ]$key
     new_value <- hot_update[changes$changes[[1]][[1]] + 1, ]$value

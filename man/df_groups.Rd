@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{df_groups}
 \alias{df_groups}
-\title{groups data frame}
+\title{df_groups}
 \usage{
 df_groups(df_participants_user, attributes_groups)
 }
