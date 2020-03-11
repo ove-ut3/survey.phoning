@@ -66,3 +66,31 @@ df_participants_events <- function(df) {
     )
   
 }
+
+#' remaining_calls
+#' 
+#' @param sqlite_base \dots
+#' @param cron_responses \dots
+#' @param maximal_date \dots
+#' @param \dots
+#' 
+#' internal function
+#' @export
+#' @keywords internal
+remaining_calls <- function(sqlite_base, cron_responses, maximal_date, ...) {
+  
+  impexp::r_import(cron_responses) %>% 
+    dplyr::filter(!completed, !optout) %>% 
+    dplyr::anti_join(
+      impexp::sqlite_import(sqlite_base, "phoning_team_events") %>% 
+        dplyr::filter(lubridate::as_date(date) >= lubridate::as_date(maximal_date)),
+      by = "token"
+    ) %>% 
+    dplyr::anti_join(
+      impexp::sqlite_import(sqlite_base, "participants") %>% 
+        dplyr::filter(stringr::str_detect(`Contact.local`, "telephone")),
+      by = "token"
+    ) %>% 
+    dplyr::count(...)
+  
+}
