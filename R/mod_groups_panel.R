@@ -42,19 +42,20 @@ mod_groups_panel_server <- function(input, output, session, rv){
       df_groups(rv$attributes_groups) %>% 
       dplyr::select_at(c(rv$attributes_groups, "participants", "completed", "response_rate", "optout", "to_contact", "n_events", "last_event_date", "user"))
     
-    select <- c(rv$attributes_groups, "Participants" = "participants", "Complétés" = "completed", "Taux de réponse" = "response_rate", "Refus" = "optout", "A contacter" = "to_contact", "Suivis" = "n_events", "Date" = "last_event_date")
+    names <- c(rv$attributes_groups, "Participants", "Compl\u00e9t\u00e9s", "Taux de r\u00e9ponse", "Refus", "A contacter", "Suivis", "Date")
     
     if (rv$user$user != "admin") {
       dom <- 'rt'
       scrollY <- '40vh'
+      rv$df_groups <- dplyr::select(rv$df_groups, -.data$user)
+      names(rv$df_groups) <- names
     } else {
       dom <- 'rft'
       scrollY <- '36vh'
-      select <- c(select, "Vacataire" = "user")
+      names(rv$df_groups) <- c(names, "Vacataire")
     }
     
     rv$df_groups %>% 
-      dplyr::select(select) %>% 
       DT::datatable(
         selection = list(mode = 'single', selected = 1),
         rownames = FALSE,
@@ -66,9 +67,9 @@ mod_groups_panel_server <- function(input, output, session, rv){
           language = list(search = "Recherche")
         )
       ) %>%
-      DT::formatPercentage("Taux de réponse", digits = 1) %>% #, dec.mark = ","
+      DT::formatPercentage("Taux de r\u00e9ponse", digits = 1) %>% #, dec.mark = ","
       DT::formatStyle(
-        "Taux de réponse",
+        "Taux de r\u00e9ponse",
         target = "row",
         backgroundColor = DT::styleInterval(c(0.499999, 0.649999, 0.749999), c("rgb(251, 145, 131)", "rgb(255, 210, 128)", "rgb(191, 255, 128)", "rgb(0, 179, 0)"))
       ) %>%
