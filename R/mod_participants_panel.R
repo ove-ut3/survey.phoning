@@ -40,7 +40,7 @@ mod_participants_panel_server <- function(input, output, session, rv){
     
     data <- rv$df_participants_user() %>% 
       df_participants_events() %>% 
-      dplyr::filter(!completed, !optout)
+      dplyr::filter(!.data$completed, !.data$optout)
     
     if (!is.null(rv$attributes_groups)) {
       data <- data %>% 
@@ -58,8 +58,13 @@ mod_participants_panel_server <- function(input, output, session, rv){
 
     if (length(rv$attributes_participants) == 0) rv$attributes_participants <- NULL
     
-    rv$df_participants_selected() %>% 
-      dplyr::select_at(c("Prénom" = "firstname", "Nom" = "lastname", rv$attributes_participants, "Avancement" = "lastpage_rate", "Suivis" = "n_events", "Date" = "last_event_date")) %>% 
+    data <- rv$df_participants_selected() %>% 
+      dplyr::select(.data$firstname, .data$lastname, rv$attributes_participants, .data$lastpage_rate, .data$n_events, .data$last_event_date)
+    
+     
+    names(data) <- c("Pr\u00e9nom", "Nom", rv$attributes_participants, "Avancement", "Suivis", "Date")
+    
+    data %>% 
       DT::datatable(
         selection = list(mode = 'single', selected = 1),
         rownames = FALSE,
@@ -67,7 +72,7 @@ mod_participants_panel_server <- function(input, output, session, rv){
           ordering = FALSE,
           scrollY = '42vh',
           dom = 'Brtip',
-          language = list(paginate = list(previous = "Précédent", `next` = 'Suivant'))
+          language = list(paginate = list(previous = "Pr\u00e9c\u00e9dent", `next` = 'Suivant'))
         )
       ) %>%
       DT::formatPercentage("Avancement", digits = 1) %>%

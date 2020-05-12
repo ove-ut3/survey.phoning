@@ -10,7 +10,7 @@ app_server <- function(input, output, session) {
     golem::get_golem_options("sqlite_base"),
     "config"
   ) %>% 
-    dplyr::filter(stringr::str_detect(key, "^lime_")) %>% 
+    dplyr::filter(stringr::str_detect(.data$key, "^lime_")) %>% 
     split(x = .$value, f = .$key)
   
   options(lime_api = config_limesurvey$lime_api)
@@ -21,21 +21,21 @@ app_server <- function(input, output, session) {
     golem::get_golem_options("sqlite_base"),
     "config"
   ) %>%
-    dplyr::filter(key == "phoning_attributes_groups") %>%
-    tidyr::separate_rows(value, sep = ";") %>%
-    dplyr::pull(value) %>% 
+    dplyr::filter(.data$key == "phoning_attributes_groups") %>%
+    tidyr::separate_rows(.data$value, sep = ";") %>%
+    dplyr::pull(.data$value) %>% 
     dplyr::na_if("") %>% 
-    na.omit()
+    stats::na.omit()
   
   rv$attributes_participants <- impexp::sqlite_import(
     golem::get_golem_options("sqlite_base"),
     "config"
   ) %>% 
-    dplyr::filter(key == "phoning_attributes_participants") %>% 
-    tidyr::separate_rows(value, sep = ";") %>% 
-    dplyr::pull(value) %>% 
+    dplyr::filter(.data$key == "phoning_attributes_participants") %>% 
+    tidyr::separate_rows(.data$value, sep = ";") %>% 
+    dplyr::pull(.data$value) %>% 
     dplyr::na_if("") %>% 
-    na.omit()
+    stats::na.omit()
   
   res_auth <- shinymanager::secure_server(
     check_credentials = shinymanager::check_credentials(
@@ -60,7 +60,7 @@ app_server <- function(input, output, session) {
       data <- data %>% 
         dplyr::inner_join(
           rv$df_phoning_team_group %>% 
-            dplyr::filter(user == rv$user$user),
+            dplyr::filter(.data$user == rv$user$user),
           by = rv$attributes_groups
         )
       

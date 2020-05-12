@@ -67,7 +67,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
           )
         ),
         tabPanel(
-          title = "Appels manqués",
+          title = "Appels manqu\u00e9s",
           div(br(), style = "font-size: 20px"),
           DT::DTOutput(ns("phone_missed_calls"))
         ),
@@ -77,7 +77,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
           fullcalendar::fullcalendarOutput(ns("phone_appointments"), height = "80%")
         ),
         tabPanel(
-          title = "Aide-mémoire",
+          title = "Aide-m\u00e9moire",
           htmlOutput(ns("ui_help_text"))
         )
       )
@@ -113,8 +113,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         rv$df_participant_selected(),
         by = "token"
       ) %>% 
-      dplyr::select(type, comment, date) %>% 
-      tidyr::drop_na(type) %>% 
+      dplyr::select(.data$type, .data$comment, .data$date) %>% 
+      tidyr::drop_na(.data$type) %>% 
       dplyr::add_row(date = as.character(lubridate::today()))
     
     height <- 30 + (nrow(data) * 35) + 20
@@ -134,8 +134,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         rv$df_participant_selected(),
         by = "token"
       ) %>% 
-      dplyr::select(type, comment, date, token) %>% 
-      tidyr::drop_na(type) %>% 
+      dplyr::select(.data$type, .data$comment, .data$date, .data$token) %>% 
+      tidyr::drop_na(.data$type) %>% 
       dplyr::add_row(
         date = as.character(lubridate::today()),
         token = rv$df_participant_selected()$token
@@ -163,8 +163,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         datetime = as.character(lubridate::now()),
         user = rv$user$user
       ) %>% 
-      tidyr::drop_na(type) %>% 
-      dplyr::select(token, type, comment, date, datetime, user)
+      tidyr::drop_na(.data$type) %>% 
+      dplyr::select(.data$token, .data$type, .data$comment, .data$date, .data$datetime, .data$user)
     
     if (nrow(hot_update) == 0) {
       token_sqlite <- rv$df_participant_selected()$token
@@ -193,11 +193,11 @@ mod_contacts_panel_server <- function(input, output, session, rv){
   data_proxy <- reactive({
     
     data_proxy <- rv$df_phoning_team_events %>% 
-      tidyr::drop_na(type) %>% 
-      dplyr::group_by(token) %>% 
+      tidyr::drop_na(.data$type) %>% 
+      dplyr::group_by(.data$token) %>% 
       dplyr::summarise(
-        hot_n_events = dplyr::n_distinct(date),
-        hot_last_event_date = suppressWarnings(max(date))
+        hot_n_events = dplyr::n_distinct(.data$date),
+        hot_last_event_date = suppressWarnings(max(.data$date))
       ) %>% 
       dplyr::ungroup()
     
@@ -212,8 +212,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         by = "token"
       ) %>% 
       dplyr::mutate(
-        n_events = hot_n_events,
-        last_event_date = hot_last_event_date
+        n_events = .data$hot_n_events,
+        last_event_date = .data$hot_last_event_date
       ) %>% 
       dplyr::select_at(c("firstname", "lastname", rv$attributes_participants, "lastpage_rate", "n_events", "last_event_date"))
     
@@ -236,31 +236,31 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         data_proxy() %>%
           dplyr::right_join(
             rv$df_participants_user() %>%
-              dplyr::select(c("token", rv$attributes_groups, completed, optout)),
+              dplyr::select(c("token", rv$attributes_groups, .data$completed, .data$optout)),
             by = "token"
           ) %>% 
           tidyr::replace_na(list(hot_n_events = 0L)) %>%
           dplyr::mutate(
-            hot_n_events = dplyr::if_else(completed | optout, NA_integer_, hot_n_events),
-            hot_last_event_date = dplyr::if_else(completed | optout, NA_character_, hot_last_event_date)
+            hot_n_events = dplyr::if_else(.data$completed | .data$optout, NA_integer_, .data$hot_n_events),
+            hot_last_event_date = dplyr::if_else(.data$completed | .data$optout, NA_character_, .data$hot_last_event_date)
           ) %>% 
           dplyr::group_by_at(rv$attributes_groups) %>%
           dplyr::summarise(
-            hot_n_events = suppressWarnings(as.integer(min(hot_n_events, na.rm = TRUE))),
-            hot_last_event_date = suppressWarnings(min(hot_last_event_date, na.rm = TRUE)),
-            hot_n_events = dplyr::if_else(is.na(hot_last_event_date), NA_integer_, hot_n_events)
+            hot_n_events = suppressWarnings(as.integer(min(.data$hot_n_events, na.rm = TRUE))),
+            hot_last_event_date = suppressWarnings(min(.data$hot_last_event_date, na.rm = TRUE)),
+            hot_n_events = dplyr::if_else(is.na(.data$hot_last_event_date), NA_integer_, .data$hot_n_events)
           ) %>%
           dplyr::ungroup(),
         by = rv$attributes_groups
       ) %>%
       dplyr::mutate(
-        n_events = dplyr::if_else(!is.na(hot_n_events), hot_n_events, n_events),
-        last_event_date = dplyr::if_else(!is.na(hot_last_event_date), hot_last_event_date, last_event_date)
+        n_events = dplyr::if_else(!is.na(.data$hot_n_events), .data$hot_n_events, .data$n_events),
+        last_event_date = dplyr::if_else(!is.na(.data$hot_last_event_date), .data$hot_last_event_date, .data$last_event_date)
       ) %>%
       dplyr::select_at(names(rv$df_groups))
 
     if (rv$user$user != "admin") {
-      data_groups_proxy <- dplyr::select(data_groups_proxy, -user)
+      data_groups_proxy <- dplyr::select(data_groups_proxy, -.data$user)
     }
     
     DT::replaceData(
@@ -278,7 +278,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     req(rv$df_participant_selected_contacts())
     
     tagList(
-      h3("Coordonnées"),
+      h3("Coordonn\u00e9es"),
       rhandsontable::rHandsontableOutput(ns("hot_contacts_valid"))
     )
     
@@ -287,9 +287,9 @@ mod_contacts_panel_server <- function(input, output, session, rv){
   output$hot_contacts_valid <- rhandsontable::renderRHandsontable({
     
     df <- rv$df_participant_selected_contacts() %>% 
-      dplyr::filter(!status %in% "invalid") %>% 
-      dplyr::filter(!key %in% "tel_etudiant") %>% 
-      dplyr::select(key, value, token)
+      dplyr::filter(!.data$status %in% "invalid") %>% 
+      dplyr::filter(!.data$key %in% "tel_etudiant") %>% 
+      dplyr::select(.data$key, .data$value, .data$token)
     
     if (nrow(df) == 0) {
       df <- dplyr::add_row(df, token = rv$df_participant_selected()$token)
@@ -316,7 +316,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       dplyr::as_tibble()
   
     if (nrow(hot_update) >= 1) {
-      hot_update <- tidyr::replace_na(hot_update, list(token = na.omit(hot_update$token)[1]))
+      hot_update <- tidyr::replace_na(hot_update, list(token = stats::na.omit(hot_update$token)[1]))
     }
     
     hot_update <- hot_update %>% 
@@ -325,7 +325,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         by = c("token", "key", "value")
       ) %>% 
       dplyr::mutate(status = "valid") %>% 
-      dplyr::select(token, key, value, source, date, service, status, status_date) %>% 
+      dplyr::select(.data$token, .data$key, .data$value, .data$source, .data$date, .data$service, .data$status, .data$status_date) %>% 
       unique()
     
     key <- hot_update[changes$changes[[1]][[1]] + 1, ]$key
@@ -344,20 +344,20 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       
       phoning_crowdsourcing_log <- hot_update %>% 
         survey.admin::df_participants_contacts_crowdsourcing() %>% 
-        tidyr::gather("key", "value", -token, na.rm = TRUE) %>% 
-        dplyr::rename(new_value = value) %>% 
+        tidyr::gather("key", "value", -.data$token, na.rm = TRUE) %>% 
+        dplyr::rename(new_value = .data$value) %>% 
         dplyr::full_join(
           impexp::sqlite_import(
             golem::get_golem_options("sqlite_base"),
             "participants_contacts"
           ) %>% 
-            dplyr::filter(token == token_sqlite, status == "valid") %>% 
+            dplyr::filter(.data$token == token_sqlite, .data$status == "valid") %>% 
             survey.admin::df_participants_contacts_crowdsourcing() %>% 
-            tidyr::gather("key", "value", -token, na.rm = TRUE) %>% 
-            dplyr::rename(old_value = value),
+            tidyr::gather("key", "value", -.data$token, na.rm = TRUE) %>% 
+            dplyr::rename(old_value = .data$value),
           by = c("token", "key")
         ) %>% 
-        dplyr::filter(purrr::map2_lgl(old_value, new_value, ~ !.x %in% .y | !.y %in% .x)) %>% 
+        dplyr::filter(purrr::map2_lgl(.data$old_value, .data$new_value, ~ !.x %in% .y | !.y %in% .x)) %>% 
         dplyr::mutate(
           user = rv$user$user,
           date = as.character(lubridate::today()),
@@ -431,7 +431,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     req(rv$df_participant_selected_contacts())
     
     tagList(
-      h3("Coordonnées invalides"),
+      h3("Coordonn\u00e9es invalides"),
       rhandsontable::rHandsontableOutput(ns("hot_contacts_invalid"))
     )
     
@@ -440,9 +440,9 @@ mod_contacts_panel_server <- function(input, output, session, rv){
   output$hot_contacts_invalid <- rhandsontable::renderRHandsontable({
     
     df <-  rv$df_participant_selected_contacts() %>% 
-      dplyr::filter(status == "invalid") %>% 
-      dplyr::filter(key != "tel_etudiant") %>% 
-      dplyr::select(key, value, token)
+      dplyr::filter(.data$status == "invalid") %>% 
+      dplyr::filter(.data$key != "tel_etudiant") %>% 
+      dplyr::select(.data$key, .data$value, .data$token)
     
     if (nrow(df) == 0) {
       df <- dplyr::add_row(df, token = rv$df_participant_selected()$token)
@@ -469,7 +469,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       dplyr::as_tibble()
     
     if (nrow(hot_update) >= 1) {
-      hot_update <- tidyr::replace_na(hot_update, list(token = na.omit(hot_update$token)[1]))
+      hot_update <- tidyr::replace_na(hot_update, list(token = stats::na.omit(hot_update$token)[1]))
     }
     
     hot_update <- hot_update %>% 
@@ -478,7 +478,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         by = c("token", "key", "value")
       ) %>% 
       dplyr::mutate(status = "invalid") %>% 
-      dplyr::select(token, key, value, source, date, service, status, status_date) %>% 
+      dplyr::select(.data$token, .data$key, .data$value, .data$source, .data$date, .data$service, .data$status, .data$status_date) %>% 
       unique()
     
     key <- hot_update[changes$changes[[1]][[1]] + 1, ]$key
@@ -497,20 +497,20 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       
       phoning_crowdsourcing_log <- hot_update %>% 
         survey.admin::df_participants_contacts_crowdsourcing() %>% 
-        tidyr::gather("key", "value", -token, na.rm = TRUE) %>% 
-        dplyr::rename(new_value = value) %>% 
+        tidyr::gather("key", "value", -.data$token, na.rm = TRUE) %>% 
+        dplyr::rename(new_value =.data$ value) %>% 
         dplyr::full_join(
           impexp::sqlite_import(
             golem::get_golem_options("sqlite_base"),
             "participants_contacts"
           ) %>% 
-            dplyr::filter(token == token_sqlite, status == "invalid") %>% 
+            dplyr::filter(.data$token == token_sqlite, .data$status == "invalid") %>% 
             survey.admin::df_participants_contacts_crowdsourcing() %>% 
-            tidyr::gather("key", "value", -token, na.rm = TRUE) %>% 
-            dplyr::rename(old_value = value),
+            tidyr::gather("key", "value", -.data$token, na.rm = TRUE) %>% 
+            dplyr::rename(old_value = .data$value),
           by = c("token", "key")
         ) %>% 
-        dplyr::filter(purrr::map2_lgl(old_value, new_value, ~ !.x %in% .y | !.y %in% .x)) %>% 
+        dplyr::filter(purrr::map2_lgl(.data$old_value, .data$new_value, ~ !.x %in% .y | !.y %in% .x)) %>% 
         dplyr::mutate(
           user = rv$user$user,
           date = as.character(lubridate::today()),
@@ -551,7 +551,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         width = 4,
         actionButton(
           ns("message_laisse"),
-          "Message laissé"
+          "Message laiss\u00e9"
         )
       ),
       column(
@@ -565,7 +565,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         width = 4,
         actionButton(
           ns("faux_numero"),
-          "Faux numéro"
+          "Faux num\u00e9ro"
         )
       )
     )
@@ -578,8 +578,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       golem::get_golem_options("sqlite_base"),
       dplyr::tibble(
         token = rv$df_participant_selected()$token,
-        type = "Message laissé",
-        comment = "Numéro:",
+        type = "Message laiss\u00e9",
+        comment = "Num\u00e9ro:",
         date = as.character(lubridate::today()),
         datetime = as.character(lubridate::now()),
         user = rv$user$user
@@ -601,7 +601,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       dplyr::tibble(
         token = rv$df_participant_selected()$token,
         type = "Pas de messagerie",
-        comment = "Numéro:",
+        comment = "Num\u00e9ro:",
         date = as.character(lubridate::today()),
         datetime = as.character(lubridate::now()),
         user = rv$user$user
@@ -622,8 +622,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       golem::get_golem_options("sqlite_base"),
       dplyr::tibble(
         token = rv$df_participant_selected()$token,
-        type = "Faux numéro",
-        comment = "Numéro:",
+        type = "Faux num\u00e9ro",
+        comment = "Num\u00e9ro:",
         date = as.character(lubridate::today()),
         datetime = as.character(lubridate::now()),
         user = rv$user$user
@@ -683,8 +683,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     
     df <- dplyr::tibble(
       token = rv$df_participant_selected()$token,
-      type = "Rendez-vous téléphonique",
-      comment = format(input$appointment, "Le %d/%m/%Y à %H:%M"),
+      type = "Rendez-vous t\u00e9l\u00e9phonique",
+      comment = format(input$appointment, "Le %d/%m/%Y \u00e0 %H:%M"),
       date = as.character(lubridate::today()),
       datetime = as.character(lubridate::now()),
       user = user,
@@ -692,7 +692,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     
     impexp::sqlite_execute_sql(
       golem::get_golem_options("sqlite_base"),
-      paste0('DELETE FROM phoning_team_events WHERE type = \"Rendez-vous téléphonique\" AND token = "', rv$df_participant_selected()$token, '";')
+      paste0('DELETE FROM phoning_team_events WHERE type = \"Rendez-vous t\u00e9l\u00e9phonique\" AND token = "', rv$df_participant_selected()$token, '";')
     )
     
     impexp::sqlite_append_rows(
@@ -718,17 +718,17 @@ mod_contacts_panel_server <- function(input, output, session, rv){
 
       rv$df_phoning_team_events %>%
       dplyr::filter(
-        type == "Rendez-vous téléphonique",
-        user == rv$user$user
+        .data$type == "Rendez-vous t\u00e9l\u00e9phonique",
+        .data$user == rv$user$user
       ) %>%
-      dplyr::mutate_at("comment", stringr::str_replace, "Le (.+?) à (.+)", "\\1 \\2:00") %>%
+      dplyr::mutate_at("comment", stringr::str_replace, "Le (.+?) \u00e0 (.+)", "\\1 \\2:00") %>%
       dplyr::mutate_at("comment", lubridate::dmy_hms) %>%
-      dplyr::filter(comment >= lubridate::now(tz = "UTC") + 60 * 60) %>%
-      dplyr::arrange(comment) %>%
-      head(1) %>% 
+      dplyr::filter(.data$comment >= lubridate::now(tz = "UTC") + 60 * 60) %>%
+      dplyr::arrange(.data$comment) %>%
+      utils::head(1) %>% 
       dplyr::left_join(
         rv$df_participants %>% 
-          dplyr::select(token, firstname, lastname, "Libellé diplôme"),
+          dplyr::select(.data$token, .data$firstname, .data$lastname, "Libell\u00e9 dipl\u00f4me"),
         by = "token"
       )
 
@@ -743,7 +743,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     diff_time <- difftime(next_appointment()$comment, lubridate::now(tz = "UTC") + 60 * 60, units = "secs")
     
     if (diff_time >= 0 & diff_time <= (60 * 5)) {
-      showNotification(HTML(glue::glue("Rendez-vous à {format(next_appointment()$comment, '%H:%M')} :<br>{next_appointment()$firstname} {next_appointment()$lastname}<br>{next_appointment()[['Libellé diplôme']]}")), duration = NULL, type = "error")
+      showNotification(HTML(glue::glue("Rendez-vous \u00e0 {format(next_appointment()$comment, '%H:%M')} :<br>{next_appointment()$firstname} {next_appointment()$lastname}<br>{next_appointment()[['Libell\u00e9 dipl\u00f4me']]}")), duration = NULL, type = "error")
     }
 
   })
@@ -753,9 +753,9 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     req(rv$df_participant_selected_contacts())
     
     emails_list <- rv$df_participant_selected_contacts() %>% 
-      dplyr::filter(key == "email") %>% 
-      dplyr::filter(!status %in% "invalid") %>% 
-      dplyr::pull(value)
+      dplyr::filter(.data$key == "email") %>% 
+      dplyr::filter(!.data$status %in% "invalid") %>% 
+      dplyr::pull(.data$value)
     
     ui <- tagList(
       h3("Relance email et SMS")
@@ -780,9 +780,9 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     }
     
     phone_list <- rv$df_participant_selected_contacts() %>% 
-      dplyr::filter(key == "tel_portable") %>% 
-      dplyr::filter(!status %in% "invalid") %>% 
-      dplyr::pull(value)
+      dplyr::filter(.data$key == "tel_portable") %>% 
+      dplyr::filter(!.data$status %in% "invalid") %>% 
+      dplyr::pull(.data$value)
     
     if (length(phone_list) >= 1) {
       
@@ -820,8 +820,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       dplyr::mutate(email = input$select_email)
     
     participants_attributes <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "participants_attributes") %>% 
-      tidyr::separate_rows(survey_id, sep = ";") %>% 
-      dplyr::filter(survey_id == rv$df_participant_selected()$survey_id)
+      tidyr::separate_rows(.data$survey_id, sep = ";") %>% 
+      dplyr::filter(.data$survey_id == rv$df_participant_selected()$survey_id)
     
     mail_template <- impexp::sqlite_import(
       golem::get_golem_options("sqlite_base"),
@@ -884,8 +884,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       golem::get_golem_options("sqlite_base"),
       "config"
     ) %>% 
-      dplyr::filter(key == "api_key_spothit") %>% 
-      dplyr::pull(value)
+      dplyr::filter(.data$key == "api_key_spothit") %>% 
+      dplyr::pull(.data$value)
     
     survey.api::spot_hit_send_sms(
       message = sms_template$body,
@@ -923,28 +923,28 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       golem::get_golem_options("sqlite_base"),
       "linkedin"
     ) %>%
-      dplyr::filter(key == "search_text_input") %>% 
-      dplyr::pull(value)
+      dplyr::filter(.data$key == "search_text_input") %>% 
+      dplyr::pull(.data$value)
     
     invitation_text_fr <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "linkedin") %>% 
-      dplyr::filter(key == "invitation_text_fr") %>% 
-      dplyr::pull(value) %>% 
+      dplyr::filter(.data$key == "invitation_text_fr") %>% 
+      dplyr::pull(.data$value) %>% 
       survey.admin::escape_space_glue(
         impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "participants_attributes") %>% 
-          tidyr::separate_rows(survey_id, sep = ";") %>% 
-          dplyr::filter(survey_id == rv$df_participant_selected()$survey_id)
+          tidyr::separate_rows(.data$survey_id, sep = ";") %>% 
+          dplyr::filter(.data$survey_id == rv$df_participant_selected()$survey_id)
       ) %>% 
       glue::glue_data(.x = rv$df_participant_selected()) %>% 
       glue::glue_data(.x = rv$df_participant_selected()) %>% 
       iconv(from = "UTF-8")
     
     invitation_text_en <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "linkedin") %>% 
-      dplyr::filter(key == "invitation_text_en") %>% 
-      dplyr::pull(value) %>% 
+      dplyr::filter(.data$key == "invitation_text_en") %>% 
+      dplyr::pull(.data$value) %>% 
       survey.admin::escape_space_glue(
         impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "participants_attributes") %>% 
-          tidyr::separate_rows(survey_id, sep = ";") %>% 
-          dplyr::filter(survey_id == rv$df_participant_selected()$survey_id)
+          tidyr::separate_rows(.data$survey_id, sep = ";") %>% 
+          dplyr::filter(.data$survey_id == rv$df_participant_selected()$survey_id)
       ) %>% 
       glue::glue_data(.x = rv$df_participant_selected()) %>% 
       glue::glue_data(.x = rv$df_participant_selected()) %>% 
@@ -1048,7 +1048,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     req(rv$df_participant_selected_contacts())
     
     tagList(
-      h3("Refus de répondre"),
+      h3("Refus de r\u00e9pondre"),
       actionButton(
         ns("confirm_optout"),
         label = "Refus",
@@ -1070,7 +1070,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     
     shinyalert::shinyalert(
       inputId = "optout",
-      title = "Validation du refus de réponse",
+      title = "Validation du refus de r\u00e9ponse",
       type = "info",
       showCancelButton = TRUE,
       closeOnEsc = FALSE
@@ -1099,7 +1099,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       golem::get_golem_options("sqlite_base"),
       dplyr::tibble(
         token = rv$df_participant_selected()$token,
-        type = "Refus de répondre",
+        type = "Refus de r\u00e9pondre",
         comment = NA_character_,
         date = as.character(lubridate::today()),
         datetime = as.character(lubridate::now()),
@@ -1152,15 +1152,18 @@ mod_contacts_panel_server <- function(input, output, session, rv){
   
   output$phone_missed_calls <- DT::renderDT({
     
-    rv$df_participants_contacts %>% 
-      dplyr::filter(stringr::str_detect(key, "^tel_")) %>% 
-      dplyr::select(token, key, value) %>% 
+    data <- rv$df_participants_contacts %>% 
+      dplyr::filter(stringr::str_detect(.data$key, "^tel_")) %>% 
+      dplyr::select(.data$token, .data$key, .data$value) %>% 
       dplyr::inner_join(
         rv$df_participants_user() %>% 
-          dplyr::select(token, "Prénom" = firstname, "Nom" = lastname, "Libellé diplôme"),
+          dplyr::select(.data$token, .data$firstname, .data$lastname, "Libell\u00e9 dipl\u00f4me"),
         by = "token"
-      ) %>% 
-      dplyr::select(value, key, "Prénom", "Nom", "Libellé diplôme") %>% 
+      )
+    
+    names(data) <- c("value", "key", "Pr\u00e9nom", "Nom", "Libell\u00e9 dipl\u00f4me")
+
+    data %>% 
       DT::datatable(
         selection = 'none',
         rownames = FALSE,
@@ -1176,8 +1179,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
   output$phone_appointments <- fullcalendar::renderFullcalendar({
 
     data <- rv$df_phoning_team_events %>%
-      dplyr::filter(type == "Rendez-vous téléphonique") %>% 
-      dplyr::select(-user) %>% 
+      dplyr::filter(.data$type == "Rendez-vous t\u00e9l\u00e9phonique") %>% 
+      dplyr::select(-.data$user) %>% 
       dplyr::inner_join(
         rv$df_participants_user() %>%
           dplyr::select_at(c("token", "group" = rv$attributes_groups, "firstname", "lastname", "user")),
@@ -1191,22 +1194,22 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     }
     
     data %>% 
-      dplyr::mutate_at("comment", stringr::str_replace, "Le (.+?) à (.+)", "\\1 \\2:00") %>% 
+      dplyr::mutate_at("comment", stringr::str_replace, "Le (.+?) \u00e0 (.+)", "\\1 \\2:00") %>% 
       dplyr::mutate_at("comment", lubridate::dmy_hms) %>% 
-      dplyr::select(title, start = comment) %>%
+      dplyr::select(.data$title, start = .data$comment) %>%
       fullcalendar::fullcalendar(
         settings = list(
           defaultView = "listWeek",
           titleFormat = "DD MMM YYYY",
-          noEventsMessage = "Aucun rendez-vous programmé",
+          noEventsMessage = "Aucun rendez-vous programm\u00e9",
           firstDay = 1,
           timeFormat = "H:mm",
           buttonText = list("today" = "Aujourd'hui"),
           listDayAltFormat = "DD MMMM YYYY",
           dayNames = list("Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"),
           dayNamesShort = list("Dim","Lun","Mar","Mer","Jeu","Ven","Sam"),
-          monthNames = list("Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"),
-          monthNamesShort = list("Jan","Fev","Mar","Avr","Mai","Juin","Juil","Aou","Sep","Oct","Nov","Déc")
+          monthNames = list("Janvier","F\u00e9vrier","Mars","Avril","Mai","Juin","Juillet","Ao\u00fbt","Septembre","Octobre","Novembre","D\u00e9cembre"),
+          monthNamesShort = list("Jan","Fev","Mar","Avr","Mai","Juin","Juil","Aou","Sep","Oct","Nov","D\u00e9c")
         )
       )
 
@@ -1215,8 +1218,8 @@ mod_contacts_panel_server <- function(input, output, session, rv){
   output$ui_help_text <- renderText({
     
     rv$df_config %>% 
-      dplyr::filter(key == "phoning_help_text") %>% 
-      dplyr::pull(value) %>% 
+      dplyr::filter(.data$key == "phoning_help_text") %>% 
+      dplyr::pull(.data$value) %>% 
       stringr::str_replace_all("\n", "<br/>") %>% 
       HTML()
     
