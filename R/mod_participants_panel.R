@@ -60,7 +60,6 @@ mod_participants_panel_server <- function(input, output, session, rv){
     
     data <- rv$df_participants_selected() %>% 
       dplyr::select(.data$firstname, .data$lastname, rv$attributes_participants, .data$lastpage_rate, .data$n_events, .data$last_event_date)
-    
      
     names(data) <- c("Pr\u00e9nom", "Nom", rv$attributes_participants, "Avancement", "Suivis", "Date")
     

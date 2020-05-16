@@ -41,39 +41,6 @@ mod_init_sqlite_server <- function(input, output, session, rv){
   rv$df_phoning_team_group <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "phoning_team_group") %>% 
     dplyr::rename_all(stringr::str_replace_all, "\\.", " ")
   
-  if (! "phoning_team_events" %in% impexp::sqlite_list_tables(golem::get_golem_options("sqlite_base"))) {
-    
-    impexp::sqlite_export(
-      golem::get_golem_options("sqlite_base"), 
-      dplyr::tibble(
-        token = character(0),
-        type = character(0),
-        comment = character(0),
-        date = character(0),
-        datetime = character(0),
-        user = character(0),
-      ),
-      "phoning_team_events"
-    )
-  }
-  
   rv$df_phoning_team_events <- impexp::sqlite_import(golem::get_golem_options("sqlite_base"), "phoning_team_events")
-  
-  if (! "phoning_crowdsourcing_log" %in% impexp::sqlite_list_tables(golem::get_golem_options("sqlite_base"))) {
-    
-    impexp::sqlite_export(
-      golem::get_golem_options("sqlite_base"), 
-      dplyr::tibble(
-        token = character(0),
-        key = character(0),
-        new_value = character(0),
-        old_value = character(0),
-        user = character(0),
-        date = character(0),
-        status = character(0)
-      ),
-      "phoning_crowdsourcing_log"
-    )
-  }
   
 }
