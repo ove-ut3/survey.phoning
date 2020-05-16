@@ -47,15 +47,16 @@ mod_groups_panel_server <- function(input, output, session, rv){
     if (rv$user$user != "admin") {
       dom <- 'rt'
       scrollY <- '40vh'
-      rv$df_groups <- dplyr::select(rv$df_groups, -.data$user)
-      names(rv$df_groups) <- names
+      data <- dplyr::select(rv$df_groups, -.data$user)
+      names(data) <- names
     } else {
       dom <- 'rft'
       scrollY <- '36vh'
-      names(rv$df_groups) <- c(names, "Vacataire")
+      data <- rv$df_groups
+      names(data) <- c(names, "Vacataire")
     }
     
-    rv$df_groups %>% 
+    data %>% 
       DT::datatable(
         selection = list(mode = 'single', selected = 1),
         rownames = FALSE,

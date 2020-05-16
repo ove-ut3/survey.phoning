@@ -351,7 +351,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
             golem::get_golem_options("sqlite_base"),
             "participants_contacts"
           ) %>% 
-            dplyr::filter(.data$token == token_sqlite, .data$status == "valid") %>% 
+            dplyr::filter(.data$token == token_sqlite, !.data$status %in% "invalid") %>% 
             survey.admin::df_participants_contacts_crowdsourcing() %>% 
             tidyr::gather("key", "value", -.data$token, na.rm = TRUE) %>% 
             dplyr::rename(old_value = .data$value),
@@ -372,7 +372,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       
       impexp::sqlite_execute_sql(
         golem::get_golem_options("sqlite_base"),
-        glue::glue("DELETE FROM participants_contacts WHERE token = \"{token_sqlite}\" AND status = \"valid\";")
+        glue::glue("DELETE FROM participants_contacts WHERE token = \"{token_sqlite}\" AND (status != \"invalid\" OR status IS NULL);")
       )
       
       impexp::sqlite_append_rows(
