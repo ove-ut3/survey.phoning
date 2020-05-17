@@ -728,7 +728,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       utils::head(1) %>% 
       dplyr::left_join(
         rv$df_participants %>% 
-          dplyr::select(.data$token, .data$firstname, .data$lastname, "Libell\u00e9 dipl\u00f4me"),
+          dplyr::select(.data$token, .data$firstname, .data$lastname, rv$attributes_groups),
         by = "token"
       )
 
@@ -743,7 +743,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
     diff_time <- difftime(next_appointment()$comment, lubridate::now(tz = "UTC") + 60 * 60, units = "secs")
     
     if (diff_time >= 0 & diff_time <= (60 * 5)) {
-      showNotification(HTML(glue::glue("Rendez-vous \u00e0 {format(next_appointment()$comment, '%H:%M')} :<br>{next_appointment()$firstname} {next_appointment()$lastname}<br>{next_appointment()[['Libell\u00e9 dipl\u00f4me']]}")), duration = NULL, type = "error")
+      showNotification(HTML(glue::glue("Rendez-vous \u00e0 {format(next_appointment()$comment, '%H:%M')} :<br>{next_appointment()$firstname} {next_appointment()$lastname}<br>{next_appointment()[[rv$attributes_groups[1]]]}")), duration = NULL, type = "error")
     }
 
   })
@@ -758,7 +758,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       dplyr::pull(.data$value)
     
     ui <- tagList(
-      h3("Relance email et SMS")
+      h3("Relance email")
     )
     
     if (length(emails_list) >= 1) {
@@ -778,30 +778,7 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       )
       
     }
-    
-    phone_list <- rv$df_participant_selected_contacts() %>% 
-      dplyr::filter(.data$key == "tel_portable") %>% 
-      dplyr::filter(!.data$status %in% "invalid") %>% 
-      dplyr::pull(.data$value)
-    
-    if (length(phone_list) >= 1) {
-      
-      ui <- tagAppendChildren(
-        ui,
-        div(
-          div(
-            style = "display: inline-block; vertical-align: top;",
-            selectInput(ns("select_phone"), label = NULL, choices = phone_list)
-          ),
-          div(
-            style = "display: inline-block; vertical-align: top;",
-            actionButton(ns("confirm_send_sms"), "Envoyer SMS", icon = icon("mobile"))
-          )
-        )
-      )
-      
-    }
-    
+
     ui
     
   })
@@ -850,57 +827,6 @@ mod_contacts_panel_server <- function(input, output, session, rv){
         token = rv$df_participant_selected()$token,
         type = "email",
         comment = input$select_email,
-        date = as.character(lubridate::today()),
-        datetime = as.character(lubridate::now()),
-        user = rv$user$user
-      ),
-      "phoning_team_events"
-    )
-    
-    rv$df_phoning_team_events <- impexp::sqlite_import(
-      golem::get_golem_options("sqlite_base"),
-      "phoning_team_events"
-    )
-    
-  })
-  
-  observeEvent(input$confirm_sms, {
-    
-    shinyalert::shinyalert(inputId = "send_sms", title = "Do you confirm SMS ?", type = "info", showCancelButton = TRUE, closeOnEsc = FALSE)
-    
-  })
-  
-  observeEvent(input$send_sms, {
-    
-    req(input$send_sms)
-    
-    sms_template <- impexp::sqlite_import(
-      golem::get_golem_options("sqlite_base"),
-      "sms_template"
-    ) %>% 
-      split(x = .$value, f = .$key)
-    
-    api_key <- impexp::sqlite_import(
-      golem::get_golem_options("sqlite_base"),
-      "config"
-    ) %>% 
-      dplyr::filter(.data$key == "api_key_spothit") %>% 
-      dplyr::pull(.data$value)
-    
-    survey.api::spot_hit_send_sms(
-      message = sms_template$body,
-      destinataires = input$select_phone,
-      key = api_key,
-      expediteur = sms_template$sender,
-      encodage = "ucs2"
-    )
-    
-    impexp::sqlite_append_rows(
-      golem::get_golem_options("sqlite_base"),
-      dplyr::tibble(
-        token = rv$df_participant_selected()$token,
-        type = "sms",
-        comment = input$select_phone,
         date = as.character(lubridate::today()),
         datetime = as.character(lubridate::now()),
         user = rv$user$user
@@ -1157,11 +1083,12 @@ mod_contacts_panel_server <- function(input, output, session, rv){
       dplyr::select(.data$token, .data$key, .data$value) %>% 
       dplyr::inner_join(
         rv$df_participants_user() %>% 
-          dplyr::select(.data$token, .data$firstname, .data$lastname, "Libell\u00e9 dipl\u00f4me"),
+          dplyr::select(.data$token, .data$firstname, .data$lastname, rv$attributes_groups),
         by = "token"
-      )
+      ) %>% 
+      dplyr::select(.data$value, .data$key, .data$firstname, .data$lastname, rv$attributes_groups)
     
-    names(data) <- c("value", "key", "Pr\u00e9nom", "Nom", "Libell\u00e9 dipl\u00f4me")
+    names(data) <- c("value", "key", "Pr\u00e9nom", "Nom", rv$attributes_groups)
 
     data %>% 
       DT::datatable(
